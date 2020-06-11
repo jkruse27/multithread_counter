@@ -20,14 +20,15 @@ int count = 0;
 int is_prime(long unsigned int num){
 	if(num < 2)
 		return 0;
-	if(num > 1 && num < 4)
-		return 1;
 	for(unsigned int i = 2; i <= num/2; i++)
 		if(num % i == 0)
 			return 0;
 	return 1;
 }
 
+// Thread
+// Comeca dando lock para outras threads nao alterarem o contador enquanto esta esta usando
+// Soma 1 na variavel contadora se o numero for primo
 void *thread(void *args){
 	long unsigned int k = *((long unsigned int *)args);
 	int a = is_prime(k);
@@ -41,9 +42,9 @@ void *thread(void *args){
 int main() {
 	int child = 0; // numero de filhos ativos
 	
-	long unsigned int c = 0;
-	long unsigned int list[4] = {0, 0, 0, 0}; 
-	pthread_t t[4] = {0, 0, 0, 0};
+	long unsigned int c = 0; // Variavel para receber a entrada
+	long unsigned int list[4] = {0, 0, 0, 0}; //Guarda os valores sendo usados em cada thread
+	pthread_t t[4] = {0, 0, 0, 0}; // Guarda as threads ativas
  	
 	do{
 		// Recebe 1 inteiro da entrada 
@@ -60,7 +61,8 @@ int main() {
 		}
 		
 		int index = 0;
-		//Cria uma nova thread para verificar se o numero eh primo
+		// Encontra posicao da primeira thread vazia e
+		// Cria uma nova thread para verificar se o numero eh primo
 		for(int i = 0; i < 4; i++){
 			if(t[i] == 0){
 				index = i;
@@ -75,9 +77,11 @@ int main() {
 
 	}while(getchar() != '\n');
 	
-	// Espera que todas os processos filhos acabem
+	// Espera que todas as threads acabem
 	for(int i = 0; i < 4; i++)
 		pthread_join(t[i], NULL);	
+	
+
 	printf("%d\n", count);
 
 	return 0;
